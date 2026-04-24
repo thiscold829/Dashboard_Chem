@@ -563,9 +563,9 @@ const apps = [
   { name:'내부보고 메일', svg: ICONS.mail, url: 'mail_internal.html' },
   { name:'외부 메일 작성', svg: ICONS.send, url: 'https://chatgpt.com/c/697c4eee-e414-83a6-8d15-4c201d6db004' },
   { name:'업무보고 작성', svg: ICONS.document, url: 'ax_worklog.html' },
-  { name:'내 업무보고 보기', svg: ICONS.archive, url: 'ax_viewer.html' },
-  { name:'Google 캘린더', svg: ICONS.calendar, url: 'https://calendar.google.com' },
-  { name:'앱 6', svg: ICONS.cube, ph:true },
+  { name:'내 업무보고', svg: ICONS.archive, url: 'ax_viewer.html' },
+  { name:'캘린더', svg: ICONS.calendar, url: 'https://calendar.google.com' },
+    { name:'내 업무보고 연동 데모', svg: ICONS.archive, url: 'ax_worklog_demo.html' },
 ];
 document.getElementById('appsGrid').innerHTML = apps.map(a=>`
   <div class="app-card ${a.ph?'disabled':''}" ${a.url ? `onclick="window.open('${a.url}', '_blank')"` : ''}>
