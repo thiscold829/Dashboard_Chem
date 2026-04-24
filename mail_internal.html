@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>내부보고 메일</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
+      background: #f5f5f7;
+      color: #1d1d1f;
+      min-height: 100vh;
+      padding: 36px 40px;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .back {
+      width: 36px;
+      height: 36px;
+      background: #fff;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 1px 8px rgba(0,0,0,.08);
+      text-decoration: none;
+      color: #1d1d1f;
+    }
+    .back:hover {
+      background: #f0f0f5;
+    }
+    h1 {
+      font-size: 24px;
+      font-weight: 600;
+      letter-spacing: -.4px;
+    }
+    .sub {
+      font-size: 14px;
+      color: #86868b;
+      margin-top: 2px;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 28px;
+      box-shadow: 0 2px 16px rgba(0,0,0,.06), 0 0 0 .5px rgba(0,0,0,.05);
+    }
+    .ct {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      color: #86868b;
+      margin-bottom: 22px;
+    }
+    .fg {
+      margin-bottom: 18px;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 7px;
+    }
+    .hint {
+      font-size: 12px;
+      color: #86868b;
+      font-weight: 400;
+      margin-left: 5px;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 10px 14px;
+      background: #f5f5f7;
+      border: 1.5px solid transparent;
+      border-radius: 10px;
+      font-size: 15px;
+      font-family: inherit;
+      color: #1d1d1f;
+      outline: none;
+      transition: all .2s;
+    }
+    input:focus, textarea:focus {
+      background: #fff;
+      border-color: #0071e3;
+      box-shadow: 0 0 0 3px rgba(0,113,227,.12);
+    }
+    textarea {
+      resize: vertical;
+      line-height: 1.6;
+    }
+    .row {
+      display: flex;
+      gap: 14px;
+    }
+    .row .fg {
+      flex: 1;
+    }
+    .btn {
+      width: 100%;
+      height: 50px;
+      background: #1d1d1f;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      margin-top: 4px;
+      transition: all .2s;
+    }
+    .btn:hover {
+      background: #333;
+    }
+    .btn:active {
+      transform: scale(.98);
+    }
+    .rl {
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+    .rb {
+      width: 100%;
+      padding: 14px;
+      background: #f5f5f7;
+      border: 1.5px solid #e5e5ea;
+      border-radius: 10px;
+      font-size: 14px;
+      font-family: inherit;
+      color: #1d1d1f;
+      resize: vertical;
+      line-height: 1.7;
+      outline: none;
+    }
+    .rb:focus {
+      border-color: #0071e3;
+    }
+    .cp {
+      width: 100%;
+      height: 44px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .cp.blue {
+      background: #0071e3;
+      color: #fff;
+    }
+    .cp.blue:hover {
+      background: #0077ed;
+    }
+    .cp.green {
+      background: #34c759;
+      color: #fff;
+    }
+    .cp.green:hover {
+      background: #30d158;
+    }
+    .div {
+      height: .5px;
+      background: #e5e5ea;
+      margin: 18px 0;
+    }
+    .fb {
+      font-size: 13px;
+      color: #34c759;
+      text-align: center;
+      height: 20px;
+      margin-top: 6px;
+      opacity: 0;
+      transition: opacity .3s;
+    }
+    .empty {
+      text-align: center;
+      padding: 50px 20px;
+      color: #c7c7cc;
+      font-size: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <a class="back" href="dashboard.html">&#8592;</a>
+    <div>
+      <h1>내부보고 메일</h1>
+      <div class="sub">PM팀 개발 요청 · 엑셀 리스트 자동 생성</div>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div class="card">
+      <div class="ct">요청 정보 입력</div>
+      <div class="row">
+        <div class="fg">
+          <label>프로젝트명</label>
+          <input list="pl" id="proj" placeholder="선택 또는 직접 입력">
+          <datalist id="pl">
+            <option value="mToxinfo"></option>
+            <option value="m실험동물"></option>
+            <option value="KPNC"></option>
+            <option value="KACE"></option>
+            <option value="HBM"></option>
+            <option value="DEPs"></option>
+            <option value="불근단"></option>
+          </datalist>
+        </div>
+        <div class="fg">
+          <label>PM / 개발 담당자</label>
+          <input list="dl" id="dev" placeholder="선택 또는 직접 입력">
+          <datalist id="dl">
+            <option value="김하림 주임"></option>
+            <option value="문지민 대리"></option>
+            <option value="강상구 과장"></option>
+            <option value="김정식 부장"></option>
+            <option value="박헌석 부장"></option>
+            <option value="엄동건 차장"></option>
+            <option value="김현호 과장"></option>
+            <option value="김혜민 과장"></option>
+            <option value="송보람 대리"></option>
+          </datalist>
+        </div>
+      </div>
+      <div class="fg">
+        <label>요청 배경 <span class="hint">리스트 제목으로도 사용</span></label>
+        <input id="reason" placeholder="제목을 입력해 주세요.">
+      </div>
+      <div class="fg">
+        <label>주요 요청 내역 <span class="hint">구어체로 편하게 입력 (줄바꿔서)</span></label>
+        <textarea id="msg" rows="7" placeholder="내용을 입력해 주세요."></textarea>
+      </div>
+      <button class="btn" onclick="gen()">✦ 메일 &amp; 리스트 자동 생성</button>
+    </div>
+
+    <div class="card">
+      <div class="ct">생성 결과</div>
+      <div id="result">
+        <div class="empty">내용을 입력하고<br>생성 버튼을 눌러주세요</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  /* ══════════════════════════════════
+     1단계: 단어/구문 치환 사전
+  ══════════════════════════════════ */
+  const WORD_MAP = [
+    // 시간
+    [/\b오늘\b/g, '금일'], [/\b내일\b/g, '명일'], [/\b어제\b/g, '작일'], [/\b모레\b/g, '명후일'],
+    [/이번\s?주/g, '금주'], [/다음\s?주/g, '차주'], [/저번\s?주|지난\s?주/g, '전주'],
+    [/이번\s?달/g, '금월'], [/다음\s?달/g, '차월'], [/지난\s?달/g, '전월'],
+    [/지금\s?당장/g, '즉시'], [/지금/g, '현재'], [/나중에/g, '추후'], [/일단\b|우선\b/g, '우선적으로'],
+    
+    // 주체
+    [/우리\s?회사|저희\s?회사/g, '당사'], [/우리\s?팀|저희\s?팀/g, '당 팀'],
+    [/이거|이것/g, '본 건'], [/저거|그거|그것/g, '해당 건'], [/이쪽/g, '당사 측'], [/그쪽|거기/g, '귀사 측'],
+    
+    // 오류
+    [/에러|버그/g, '오류'], [/크래시|튕김/g, '비정상 종료'], [/\b문제\b/g, '이슈'],
+    
+    // 강도/부사
+    [/최대한\s?빨리/g, '가급적 빠른 시일 내에'], [/빨리|얼른|빠르게/g, '조속히'],
+    [/대충|대강/g, '개략적으로'], [/한번에|한꺼번에/g, '일괄적으로'],
+    [/하는\s?김에|겸사겸사/g, '진행하는 김에'], [/꼭\b|반드시\b/g, '반드시'],
+    
+    // 동작 표현
+    [/알려\s?주세요|알려\s?줘요?|알려\s?줘(?=\s|$)/g, '공유 부탁드립니다'],
+    [/물어봐요?|문의할게요?/g, '문의드립니다'],
+    [/보내\s?주세요|송부해\s?줘요?/g, '송부 부탁드립니다'],
+    [/고쳐\s?주세요|고쳐\s?줘요?/g, '수정 요청드립니다'],
+    [/바꿔\s?주세요|변경해\s?줘요?/g, '변경 요청드립니다'],
+    [/확인해\s?줘요?|확인해\s?봐요?|확인\s?부탁/g, '검토 부탁드립니다'],
+    [/봐\s?주세요|봐\s?줘요?/g, '검토 부탁드립니다'],
+    [/해\s?주세요|해\s?줘요?(?!\s*드)|해\s?줘(?=\s|$)/g, '진행 부탁드립니다'],
+    [/챙겨\s?주세요|챙겨\s?줘요?/g, '처리 부탁드립니다'],
+    [/넣어\s?주세요|추가해\s?줘요?/g, '반영 부탁드립니다'],
+    [/빼\s?주세요|삭제해\s?줘요?/g, '삭제 요청드립니다'],
+    [/체크\s?해\s?줘|체크\s?부탁/g, '확인 부탁드립니다'],
+    
+    // 상태
+    [/하려\s?함(?=\s|$)/g, '하고자 합니다'], [/하려고\s?해(?=\s|$)/g, '진행하고자 합니다'],
+    [/할\s?예정이야|할거야|할\s?거야/g, '진행할 예정입니다'],
+    [/끝났어요?|끝남|다\s?됨/g, '완료되었습니다'], [/했어요?|했음(?=\s|$)/g, '완료하였습니다'],
+    [/시작했어요?|시작함/g, '착수하였습니다'], [/준비됐어요?|준비됨/g, '준비되었습니다'],
+    [/진행\s?중이야|진행\s?중임/g, '진행 중입니다'], [/검토\s?중이야|검토\s?중임/g, '검토 중입니다'],
+    
+    // 감탄/이모지 제거
+    [/ㅠㅠ|ㅜㅜ|ㅠ|ㅜ|ㅎㅎ|ㅋㅋ/g, ''], [/!{2,}/g, '!'], [/\.{3,}/g, '…']
+  ];
+
+  /* ══════════════════════════════════
+     2단계: 문장 어미 엔진 (한국어 구어체 -> 문어체)
+  ══════════════════════════════════ */
+  const ENDING_MAP = [
+    // 서술어 어미 (순서 중요: 긴 패턴 먼저)
+    [/해야\s?할\s?것\s?같아(?:요)?$/, '해야 할 것으로 판단됩니다'],
+    [/인\s?것\s?같아(?:요)?$/, '인 것으로 판단됩니다'],
+    [/할\s?것\s?같아(?:요)?$/, '할 것으로 예상됩니다'],
+    [/일\s?것\s?같아(?:요)?$/, '일 것으로 예상됩니다'],
+    [/해야\s?할\s?듯(?:해요?)?$/, '해야 할 것으로 판단됩니다'],
+    [/해야\s?할\s?것\s?같은데$/, '해야 할 것으로 판단됩니다'],
+    [/해야\s?함(?=\s|$)/, '해야 합니다'],
+    [/해야\s?해(?:요)?(?=\s|$)/, '해야 합니다'],
+    [/필요\s?함(?=\s|$)/, '필요합니다'],
+    [/필요\s?해(?:요)?(?=\s|$)/, '필요합니다'],
+    [/예정\s?임(?=\s|$)/, '예정입니다'],
+    [/예정(?=\s|$)/, '예정입니다'],
+    [/진행\s?예정(?=\s|$)/, '진행 예정입니다'],
+    [/확인\s?요망(?=\s|$)/, '확인 요청드립니다'],
+    
+    // 구어체 어미
+    [/거든요?$/, '습니다'], [/잖아요?$/, '습니다'], [/더라고요?$/, '습니다'],
+    [/던데요?$/, '습니다'], [/는데요?$/, '습니다'], [/네요$/, '습니다'],
+    [/아요$|어요$/, '습니다'], [/해요$/, '합니다'], [/이에요$/, '입니다'], [/예요$/, '입니다'],
+    [/야$|이야$/, '입니다'], [/지$/, '습니다'], [/거든$/, '습니다'],
+    
+    // 동사 어간 어미
+    [/됨(?=\s|$)/, '됩니다'], [/함(?=\s|$)/, '합니다'], [/임(?=\s|$)/, '입니다'],
+    [/음(?=\s|$)/, '습니다'], [/중(?=\s|$)/, '중입니다']
+  ];
+
+  function convertEndings(s) {
+    for (const [re, rep] of ENDING_MAP) {
+      if (re.test(s)) {
+        s = s.replace(re, rep);
+        break;
+      }
+    }
+    if (!/[.?!…]$/.test(s)) s += '.';
+    return s;
+  }
+
+  /* ══════════════════════════════════
+     3단계: 문장 분리 엔진
+  ══════════════════════════════════ */
+  function splitSentences(raw) {
+    // 1) 줄바꿈으로 1차 분리
+    const byLine = raw.split(/\n/).map(s => s.trim()).filter(Boolean);
+    const result = [];
+    
+    for (const line of byLine) {
+      // 2) 한 줄 안에 복수 문장이면 종결어미로 추가 분리
+      const parts = line.split(/(?<=[다요함됨임음])\s+(?=[가-힣A-Z가-힣])/);
+      for (const p of parts) {
+        if (p.trim()) result.push(p.trim());
+      }
+    }
+    return result;
+  }
+
+  /* ══════════════════════════════════
+     메인 변환 함수
+  ══════════════════════════════════ */
+  function transform(raw) {
+    if (!raw.trim()) return '세부 요청 내역 없음.';
+    
+    const sentences = splitSentences(raw);
+    return sentences.map(s => {
+      // 단어 치환
+      for (const [re, rep] of WORD_MAP) {
+        s = s.replace(re, rep);
+      }
+      s = s.trim();
+      if (!s) return null;
+      
+      // 어미 변환
+      s = convertEndings(s);
+      return '- ' + s;
+    }).filter(Boolean).join('\n');
+  }
+
+  /* ══════════════════════════════════
+     분류 & 헬퍼 함수
+  ══════════════════════════════════ */
+  function classify(reason, msg) {
+    const t = (reason + ' ' + msg).toLowerCase();
+    const db = /\bdb\b|데이터베이스|쿼리|테이블|스키마/.test(t) ? 'DB' : '개발';
+    let type = '수정 요청';
+    
+    if (/보안|점검|일정|계획|권한|임시\s?계정|문의|교육|인증|승인/.test(t)) {
+      type = '기타';
+    } else if (/신규|추가|개발|구축|화면\s?설계|설계|신설/.test(t)) {
+      type = '개발 요청';
+    } else if (/수정|오류|에러|버그|변경|업데이트|개선/.test(t)) {
+      type = '수정 요청';
+    }
+    
+    return { db, type };
+  }
+
+  function josa(w, j1, j2) {
+    if (!w) return j1 + '(' + j2 + ')';
+    const c = w.charCodeAt(w.length - 1);
+    if (c < 0xAC00 || c > 0xD7A3) return j1 + '(' + j2 + ')';
+    return (c - 0xAC00) % 28 > 0 ? j1 : j2;
+  }
+
+  function ini(n) {
+    if (!n) return '';
+    const r = { '주임':'j', '대리':'d', '과장':'k', '차장':'c', '부장':'b', '팀장':'t' };
+    for (const [k, v] of Object.entries(r)) {
+      if (n.includes(k)) return n[0] + v;
+    }
+    return n[0];
+  }
+
+  /* ══════════════════════════════════
+     생성 및 렌더링
+  ══════════════════════════════════ */
+  function gen() {
+    const proj   = document.getElementById('proj').value.trim();
+    const dev    = document.getElementById('dev').value.trim();
+    const reason = document.getElementById('reason').value.trim();
+    const msg    = document.getElementById('msg').value.trim();
+    
+    if (!msg && !reason) {
+      alert('요청 내역을 입력해주세요.');
+      return;
+    }
+    
+    const lines = transform(msg);
+    const { db, type } = classify(reason, msg);
+    const j = josa(reason, '과', '와');
+    const today = new Date();
+    const ds = (today.getMonth() + 1) + '.' + today.getDate() + '.';
+    
+    const mail = `팀장님 안녕하세요. 이찬입니다.\n\n${proj ? proj + ' 사업 ' : ''}${reason}${j} 관련하여 요청 사항을 전달드립니다.\n본 건 PM팀장님께 공유하시어, 개발팀의 업무 배정 및 일정 확인을 요청드립니다.\n\n■ 업무 개요\n- 프로젝트명: ${proj || '(미입력)'}\n- 개발 담당: ${dev || '(미입력)'}\n\n■ 주요 요청 내역\n${lines}`;
+    
+    const summary = msg.split('\n').filter(l => l.trim()).join(', ');
+    const excel = `일반\t${db}\t${ds}\t찬j\t${type}\t${proj}\t${reason}\t${summary}\t장t\t${ini(dev)}\tAX팀 검토`;
+    
+    document.getElementById('result').innerHTML = `
+      <div class="fg">
+        <div class="rl">📧 완성된 메일 본문</div>
+        <textarea class="rb" id="mr" rows="14">${esc(mail)}</textarea>
+        <button class="cp blue" onclick="cp('mr','mf')">메일 본문 복사</button>
+        <div class="fb" id="mf"></div>
+      </div>
+      <div class="div"></div>
+      <div class="fg">
+        <div class="rl">📊 엑셀 리스트 한 줄 <span style="font-size:12px;color:#86868b">· ${db} / ${type}</span></div>
+        <textarea class="rb" id="er" rows="3" style="font-family:monospace;font-size:12px">${esc(excel)}</textarea>
+        <button class="cp green" onclick="cp('er','ef')">엑셀 데이터 복사</button>
+        <div class="fb" id="ef"></div>
+      </div>
+    `;
+  }
+
+  /* ══════════════════════════════════
+     유틸리티 (복사 및 이스케이프)
+  ══════════════════════════════════ */
+  function esc(s) {
+    return (s || '').replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;');
+  }
+
+  function cp(id, fb) {
+    const v = document.getElementById(id).value;
+    const f = document.getElementById(fb);
+    
+    const ok = () => {
+      f.textContent = '✓ 복사되었습니다';
+      f.style.opacity = '1';
+      setTimeout(() => { f.style.opacity = '0'; }, 2000);
+    };
+    
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(v).then(ok).catch(() => fb2(v, ok));
+    } else {
+      fb2(v, ok);
+    }
+  }
+
+  function fb2(t, cb) {
+    const a = document.createElement('textarea');
+    a.value = t;
+    Object.assign(a.style, { position: 'fixed', opacity: '0', top: '0', left: '0' });
+    document.body.appendChild(a);
+    a.focus();
+    a.select();
+    try {
+      document.execCommand('copy');
+      cb();
+    } catch {
+      alert('복사 실패');
+    }
+    document.body.removeChild(a);
+  }
+</script>
+</body>
+</html>

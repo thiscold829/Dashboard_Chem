@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>식품AX 업무일지 전체보기</title>
+<style>
+/* ── RESET & MODERN BASE ── */
+:root {
+  --bg-color: #FAFAFA;
+  --surface: #FFFFFF;
+  --border: #E5E5E5;
+  --text-main: #171717;
+  --text-muted: #737373;
+  --accent: #000000;
+  --accent-light: #F5F5F5;
+  --radius: 12px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── TOP NAVIGATION ── */
+.top-nav {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 40px;
+  height: 64px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.brand { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 12px; }
+.brand-badge { background: var(--accent); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+
+/* ── MAIN WORKSPACE ── */
+.workspace {
+  max-width: 1000px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 40px;
+  flex: 1;
+}
+
+/* ── HEADER CONTROLS ── */
+.viewer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.title-group h1 { font-size: 28px; font-weight: 700; letter-spacing: -1px; }
+.title-group p { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+
+.btn-group { display: flex; gap: 8px; }
+
+.btn-import {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: opacity 0.2s;
+}
+.btn-import:hover { opacity: 0.8; }
+.btn-save-all { background: #059669; }
+.btn-reset { background: #ef4444; } /* 초기화 버튼 색상 추가 */
+
+/* ── FILTER & SEARCH CONTROLS ── */
+.controls-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 32px;
+  display: none;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+}
+
+.control-row {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.search-input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+}
+.search-input:focus { border-color: var(--accent); }
+
+.filter-input {
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  background: var(--surface);
+  color: var(--text-main);
+  outline: none;
+  cursor: pointer;
+}
+.filter-input:focus { border-color: var(--accent); }
+
+.date-separator {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.biz-filter-container {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  width: 100%;
+}
+.biz-filter-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-right: 8px;
+}
+
+.biz-pill {
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  background: var(--surface);
+  color: var(--text-muted);
+  transition: all 0.2s;
+}
+.biz-pill:hover { border-color: var(--text-muted); }
+.biz-pill.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+/* ── TIMELINE FEED ── */
+.timeline { display: flex; flex-direction: column; gap: 24px; }
+
+.day-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+}
+
+.day-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--accent-light);
+}
+.day-date { font-size: 20px; font-weight: 700; color: var(--accent); }
+.day-count { font-size: 13px; font-weight: 600; color: var(--text-muted); background: var(--accent-light); padding: 4px 10px; border-radius: 20px; }
+
+.biz-group { margin-bottom: 16px; }
+.biz-group:last-child { margin-bottom: 0; }
+.biz-name { 
+  display: inline-block;
+  font-size: 12px; 
+  font-weight: 700; 
+  color: var(--text-muted); 
+  margin-bottom: 8px;
+  background: var(--accent-light);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.task-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 6px;
+  padding-left: 4px;
+}
+.task-bullet { color: #D4D4D4; margin-top: 2px; }
+.task-text { font-size: 15px; line-height: 1.5; color: var(--text-main); }
+.task-details { color: #007aff; font-weight: 500; }
+
+.empty-state {
+  text-align: center;
+  padding: 80px 0;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+}
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <div class="brand"><span class="brand-badge">AX</span> Worklog Viewer</div>
+  <div class="nav-right" id="fileCount">로드된 파일 없음</div>
+</nav>
+
+<main class="workspace">
+  <header class="viewer-header">
+    <div class="title-group">
+      <h1>개인 업무보고 전체보기</h1>
+      <p>날짜별 CSV 파일들을 통합하여 타임라인을 구성합니다.</p>
+    </div>
+    <div class="btn-group">
+      <button class="btn-import" onclick="document.getElementById('multiInput').click()">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+        불러오기
+      </button>
+      <button id="saveAllBtn" class="btn-import btn-save-all" onclick="exportFilteredCSV()" style="display:none;">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25H15M9 12l3 3m0 0 3-3m-3 3V2.25" /></svg>
+        현재 결과 저장
+      </button>
+      <button id="resetBtn" class="btn-import btn-reset" onclick="resetApp()" style="display:none;">
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
+        초기화
+      </button>
+    </div>
+    <input type="file" id="multiInput" accept=".csv" multiple style="display:none" onchange="loadFiles(event)">
+  </header>
+
+  <div class="controls-panel" id="controlsPanel">
+    <div class="control-row">
+      <input type="text" id="searchInput" class="search-input" placeholder="업무내용, 상세사항, 사업명, 날짜 등 검색..." oninput="renderTimeline()">
+      
+      <input type="date" id="startDate" class="filter-input" onchange="renderTimeline()">
+      <span class="date-separator">~</span>
+      <input type="date" id="endDate" class="filter-input" onchange="renderTimeline()">
+
+      <select id="sortOrder" class="filter-input" onchange="renderTimeline()">
+        <option value="desc">최신순 정렬</option>
+        <option value="asc">오래된순 정렬</option>
+      </select>
+    </div>
+    <div class="control-row">
+      <div class="biz-filter-container" id="bizFilterContainer">
+        <span class="biz-filter-label">사업 필터:</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="timelineFeed" class="timeline">
+    <div class="empty-state">
+      <p>저장된 CSV 파일들을 다중 선택하여 불러와주세요.</p>
+    </div>
+  </div>
+</main>
+
+<script>
+const BIZ_ORDER = ['mToxinfo', 'm실동', 'KPNC', 'HBM', 'KACE', 'DEPs', '불근단'];
+let allData = [];
+let filteredDataCache = [];
+let activeBizFilters = new Set();
+
+// 날짜 정규화 함수 (YY.MM.DD 등 -> YYYY-MM-DD 변환)
+function normalizeDate(dateStr) {
+  if (!dateStr || dateStr === 'Unknown') return 'Unknown';
+  dateStr = dateStr.trim();
+  const match = dateStr.match(/^(\d{2,4})[.\-\/](\d{1,2})[.\-\/](\d{1,2})$/);
+  if (match) {
+    let [ , year, month, day ] = match;
+    if (year.length === 2) year = '20' + year;
+    month = month.padStart(2, '0');
+    day = day.padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+  return dateStr;
+}
+
+function parseCSV(text) {
+  let p = '', row = [''], ret = [row], i = 0, r = 0, s = !0;
+  for (let c of text) {
+    if ('"' === c) {
+      if (s && c === p) row[i] += c;
+      s = !s;
+    } else if (',' === c && s) {
+      c = row[++i] = '';
+    } else if ('\n' === c && s) {
+      if ('\r' === p) row[i] = row[i].slice(0, -1);
+      row = ret[++r] = [c = ''];
+      i = 0;
+    } else {
+      row[i] += c;
+    }
+    p = c;
+  }
+  return ret;
+}
+
+async function loadFiles(e) {
+  const files = Array.from(e.target.files);
+  if (files.length === 0) return;
+
+  allData = [];
+  let filePromises = files.map(file => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const rows = parseCSV(ev.target.result);
+        const isNewFormat = (rows[0] && rows[0][1] === '날짜');
+        
+        for (let i = 1; i < rows.length; i++) {
+          if (isNewFormat) {
+            if (rows[i].length >= 5 && rows[i][2]) {
+              allData.push({ id: rows[i][0], date: normalizeDate(rows[i][1]), biz: rows[i][2], task: rows[i][3], details: rows[i][4] });
+            }
+          } else {
+            if (rows[i].length >= 4 && rows[i][1]) {
+              const dateFromFilename = file.name.match(/\d{2,4}[.\-\/]\d{1,2}[.\-\/]\d{1,2}/)?.[0] || 'Unknown';
+              allData.push({ id: rows[i][0], date: normalizeDate(dateFromFilename), biz: rows[i][1], task: rows[i][2], details: rows[i][3] });
+            }
+          }
+        }
+        resolve();
+      };
+      reader.readAsText(file);
+    });
+  });
+
+  await Promise.all(filePromises);
+  document.getElementById('fileCount').textContent = `${files.length}개의 파일 로드됨`;
+  
+  if (allData.length > 0) {
+    document.getElementById('controlsPanel').style.display = 'flex';
+    document.getElementById('saveAllBtn').style.display = 'flex';
+    document.getElementById('resetBtn').style.display = 'flex'; // 파일 로드 시 초기화 버튼 표시
+    updateBizFilters();
+    renderTimeline();
+  }
+}
+
+// 전체 초기화 함수 추가
+function resetApp() {
+  // 데이터 및 필터 상태 초기화
+  allData = [];
+  filteredDataCache = [];
+  activeBizFilters.clear();
+  
+  // 입력 폼 및 파일 인풋 초기화
+  document.getElementById('searchInput').value = '';
+  document.getElementById('startDate').value = '';
+  document.getElementById('endDate').value = '';
+  document.getElementById('sortOrder').value = 'desc';
+  document.getElementById('multiInput').value = ''; // 동일 파일 재업로드 가능하도록 비움
+  
+  // UI 숨김 및 초기 상태 텍스트로 복구
+  document.getElementById('controlsPanel').style.display = 'none';
+  document.getElementById('saveAllBtn').style.display = 'none';
+  document.getElementById('resetBtn').style.display = 'none';
+  document.getElementById('fileCount').textContent = '로드된 파일 없음';
+  
+  // 타임라인 영역 빈 상태로 복구
+  document.getElementById('timelineFeed').innerHTML = `
+    <div class="empty-state">
+      <p>저장된 CSV 파일들을 다중 선택하여 불러와주세요.</p>
+    </div>
+  `;
+}
+
+function updateBizFilters() {
+  const container = document.getElementById('bizFilterContainer');
+  const uniqueBiz = [...new Set(allData.map(item => item.biz).filter(Boolean))];
+  
+  uniqueBiz.sort((a, b) => {
+    let iA = BIZ_ORDER.indexOf(a), iB = BIZ_ORDER.indexOf(b);
+    if (iA === -1) iA = 999; if (iB === -1) iB = 999;
+    return iA - iB;
+  });
+
+  let html = `<span class="biz-filter-label">사업 필터:</span>`;
+  html += uniqueBiz.map(biz => 
+    `<button class="biz-pill" onclick="toggleBiz('${biz}')">${biz}</button>`
+  ).join('');
+  
+  container.innerHTML = html;
+  activeBizFilters.clear();
+}
+
+function toggleBiz(biz) {
+  if (activeBizFilters.has(biz)) {
+    activeBizFilters.delete(biz);
+  } else {
+    activeBizFilters.add(biz);
+  }
+  
+  const pills = document.querySelectorAll('.biz-pill');
+  pills.forEach(pill => {
+    if (activeBizFilters.has(pill.textContent)) {
+      pill.classList.add('active');
+    } else {
+      pill.classList.remove('active');
+    }
+  });
+  
+  renderTimeline();
+}
+
+function renderTimeline() {
+  const feed = document.getElementById('timelineFeed');
+  
+  const query = document.getElementById('searchInput').value.toLowerCase().trim();
+  const sort = document.getElementById('sortOrder').value;
+  const startDate = document.getElementById('startDate').value;
+  const endDate = document.getElementById('endDate').value;
+
+  const filteredData = allData.filter(item => {
+    if (query) {
+      const textToSearch = `${item.date} ${item.biz} ${item.task} ${item.details || ''}`.toLowerCase();
+      if (!textToSearch.includes(query)) return false;
+    }
+    if (startDate && item.date < startDate) return false;
+    if (endDate && item.date > endDate) return false;
+    if (activeBizFilters.size > 0 && !activeBizFilters.has(item.biz)) return false;
+
+    return true;
+  });
+
+  filteredDataCache = filteredData;
+
+  if (filteredData.length === 0) {
+    feed.innerHTML = '<div class="empty-state"><p>조건에 일치하는 데이터가 없습니다.</p></div>';
+    return;
+  }
+
+  const groupedByDate = filteredData.reduce((acc, item) => {
+    if (!acc[item.date]) acc[item.date] = [];
+    acc[item.date].push(item);
+    return acc;
+  }, {});
+
+  const sortedDates = Object.keys(groupedByDate).sort((a, b) => {
+    return sort === 'asc' ? a.localeCompare(b) : b.localeCompare(a);
+  });
+
+  let html = '';
+  sortedDates.forEach(date => {
+    const dayTasks = groupedByDate[date];
+    const groupedByBiz = dayTasks.reduce((acc, item) => {
+      if (!acc[item.biz]) acc[item.biz] = [];
+      acc[item.biz].push(item);
+      return acc;
+    }, {});
+
+    const sortedBizKeys = Object.keys(groupedByBiz).sort((a, b) => {
+      let iA = BIZ_ORDER.indexOf(a), iB = BIZ_ORDER.indexOf(b);
+      if (iA === -1) iA = 999; if (iB === -1) iB = 999;
+      return iA - iB;
+    });
+
+    html += `
+      <div class="day-card">
+        <div class="day-header">
+          <div class="day-date">${date}</div>
+          <div class="day-count">${dayTasks.length}건</div>
+        </div>
+        <div class="day-content">
+          ${sortedBizKeys.map(biz => `
+            <div class="biz-group">
+              <div class="biz-name">${biz}</div>
+              ${groupedByBiz[biz].map(t => `
+                <div class="task-item">
+                  <span class="task-bullet">•</span>
+                  <div class="task-text">
+                    ${t.task} ${t.details ? `<span class="task-details">(${t.details})</span>` : ''}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  });
+  
+  feed.innerHTML = html;
+}
+
+async function exportFilteredCSV() {
+  if (filteredDataCache.length === 0) return alert("저장할 데이터가 없습니다.");
+
+  const sort = document.getElementById('sortOrder').value;
+
+  const sortedData = [...filteredDataCache].sort((a, b) => {
+    if (a.date !== b.date) {
+      return sort === 'asc' ? a.date.localeCompare(b.date) : b.date.localeCompare(a.date);
+    }
+    let iA = BIZ_ORDER.indexOf(a.biz), iB = BIZ_ORDER.indexOf(b.biz);
+    if (iA === -1) iA = 999; if (iB === -1) iB = 999;
+    return iA - iB;
+  });
+
+  let csv = "ID,날짜,사업명,할일,상세관계\n";
+  const esc = (s) => (s || '').includes(',') ? `"${s.replace(/"/g, '""')}"` : s;
+  
+  sortedData.forEach(l => {
+    csv += [esc(l.id), esc(l.date), esc(l.biz), esc(l.task), esc(l.details)].join(',') + "\n";
+  });
+
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const today = new Date().toISOString().split('T')[0].replace(/-/g, '');
+  const filename = `업무일지_검색결과_${today}.csv`;
+
+  try {
+    if (window.showSaveFilePicker) {
+      const handle = await window.showSaveFilePicker({
+        suggestedName: filename,
+        types: [{ description: 'CSV File', accept: { 'text/csv': ['.csv'] } }]
+      });
+      const writable = await handle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+    } else {
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      link.click();
+    }
+  } catch(e) { if (e.name !== 'AbortError') alert("저장 실패"); }
+}
+</script>
+</body>
+</html>
